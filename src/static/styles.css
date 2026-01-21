@@ -162,6 +162,33 @@ footer {
   list-style-type: disc;
   color: #333;
   font-size: 15px;
+/* Hide bullet points and style participant items */
+.participants-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+}
+
+.participant-item {
+  background: #f3f3f3;
+  border-radius: 16px;
+  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  margin: 2px 0;
+}
+
+.delete-icon {
+  cursor: pointer;
+  margin-left: 8px;
+  color: #c00;
+  font-size: 1.1em;
+  transition: color 0.2s;
+}
+.delete-icon:hover {
+  color: #f00;
 }
 
 .no-participants {
