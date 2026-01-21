@@ -20,14 +20,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const spotsLeft = details.max_participants - details.participants.length;
 
+        // Build participants list HTML (no bullets, with delete icon)
+        let participantsHTML = "";
+        if (details.participants.length > 0) {
+          participantsHTML = `
+            <div class="participants-section">
+              <strong>Participants:</strong>
+              <div class="participants-list">
+                ${details.participants.map(email => `<span class="participant-item" data-activity="${name}" data-email="${email}">${email} <span class="delete-icon" title="Remove">&#128465;</span></span>`).join("")}
+              </div>
+            </div>
+          `;
+        } else {
+          participantsHTML = `
+            <div class="participants-section no-participants">
+              <em>No participants yet.</em>
+            </div>
+          `;
+        }
+
         activityCard.innerHTML = `
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
           <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
+          ${participantsHTML}
         `;
 
         activitiesList.appendChild(activityCard);
+
+        // Add delete icon event listeners after rendering
+        setTimeout(() => {
+          activityCard.querySelectorAll('.delete-icon').forEach(icon => {
+            icon.addEventListener('click', async (e) => {
+              const participantSpan = icon.parentElement;
+              const activityName = participantSpan.getAttribute('data-activity');
+              const email = participantSpan.getAttribute('data-email');
+              if (activityName && email) {
+                try {
+                  const response = await fetch(`/activities/${encodeURIComponent(activityName)}/unregister?email=${encodeURIComponent(email)}`, {
+                    method: 'DELETE',
+                  });
+                  if (response.ok) {
+                    fetchActivities(); // Refresh list
+                  } else {
+                    alert('Failed to unregister participant.');
+                  }
+                } catch (err) {
+                  alert('Error unregistering participant.');
+                }
+              }
+            });
+          });
+        }, 0);
 
         // Add option to select dropdown
         const option = document.createElement("option");
@@ -62,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDiv.textContent = result.message;
         messageDiv.className = "success";
         signupForm.reset();
+        fetchActivities(); // Refresh activities list after signup
       } else {
         messageDiv.textContent = result.detail || "An error occurred";
         messageDiv.className = "error";
